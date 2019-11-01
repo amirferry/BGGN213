@@ -1,2 +1,2 @@
 # BGGN213
-Bioinformatics Classwork
+UCSD Bioinformatics Classwork
