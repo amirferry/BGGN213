@@ -1,0 +1,74 @@
+---
+title: "class6"
+author: "Amir Ferry"
+date: "10/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# This is H1
+This is Class 6 work. This text will be **bold**
+
+## A H2
+
+```{r}
+D1 <- read.table(file="datafile1.txt", sep = ",", header = TRUE)
+D2 <- read.table(file="datafile2.txt", sep = "$", header = TRUE)
+D3 <- read.table(file="datafile3.txt", sep = "")
+D3
+```
+
+Our first function
+```{r}
+# y is a default value
+add <- function(x,y=1) {
+    # Sum input x and y
+    x+y
+}
+
+add(5)
+# Vectorize the input
+add(c(2,4))
+```
+
+range function gives you two elements (min and max)
+```{r}
+range(c(5,2,7,10))
+x[1] #min value
+x[2] #max value
+```
+# na.rm is used to remove NA's when computing range
+```{r}
+rescale <- function(x) {
+ rng <-range(x, na.rm = TRUE)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+```{r}
+rescale(c(1,2,NA,3))
+```
+
+
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ if(na.rm) {
+ rng <-range(x, na.rm=na.rm)
+ } else {
+ rng <-range(x)
+ }
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+}
+
+rescale3(1:10)
+```
+
