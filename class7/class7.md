@@ -1,30 +1,20 @@
----
-title: "Class7"
-author: "Amir Ferry"
-date: "10/23/2019"
-output: github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+Class7
+================
+Amir Ferry
+10/23/2019
 
 ## Revisit our functions from last day
 
-```{r}
+``` r
 source("http://tinyurl.com/rescale-R") # Barry's code 
 ```
 
+## Adding an exclamation point flips it to "not \_\_\_" if( \!is.numeric(x) ) { stop(“Input x should be numeric”, call.=FALSE) }
 
-## Adding an exclamation point flips it to "not ___"
-if( !is.numeric(x) ) {
-    stop("Input x should be numeric", call.=FALSE)
-  }
+We want to write a function, called both\_na(), that counts how many
+positions in two input vectors, x and y, both have a missing value
 
-
-We want to write a function, called both_na(), that counts how many positions in two input
-vectors, x and y, both have a missing value
-```{r}
+``` r
 # Create some data to have a simple test (answer should be 1)
 x <- c(1,3,NA,5)
 y <- c(2,NA,NA,7)
@@ -32,26 +22,33 @@ y <- c(2,NA,NA,7)
 is.na(x)
 ```
 
-```{r}
+    ## [1] FALSE FALSE  TRUE FALSE
+
+``` r
 which(is.na(x)) # Found this on Stack Overflow, tell you position
 ```
 
-```{r}
+    ## [1] 3
+
+``` r
 is.na(x) & is.na(y) 
 ```
 
-```{r}
+    ## [1] FALSE FALSE  TRUE FALSE
+
+``` r
 both_na <- function(x,y) {
 sum(is.na(x) & is.na(y))
 }
-
 ```
 
-```{r}
+``` r
 both_na(x,y)
 ```
 
-```{r}
+    ## [1] 1
+
+``` r
 x <- c(NA, NA, NA)
 y1 <- c( 1, NA, NA)
 y2 <- c( 1, NA, NA, NA)
@@ -59,10 +56,20 @@ y3 <- c(1, NA, NA, NA, NA, NA)
 
 # Both of these will recycle the x vector
 both_na(x,y2) 
+```
+
+    ## Warning in is.na(x) & is.na(y): longer object length is not a multiple of
+    ## shorter object length
+
+    ## [1] 3
+
+``` r
 both_na(x,y3)
 ```
 
-```{r}
+    ## [1] 5
+
+``` r
 both_na2 <- function(x,y) {
   if(length(x) != length(y)) { # add STOP function to prevent it from running
   stop("ERROR, input vector should be same length", call. = FALSE) # Custom message + simplified to just show my message (.call function usually TRUE)
@@ -71,9 +78,9 @@ sum(is.na(x) & is.na(y))
 } 
 ```
 
-
 ## Goal is to calculate overall grade after dropping lowest score for each student
-```{r}
+
+``` r
 # student 1
 student1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
 # student 2
@@ -82,33 +89,40 @@ student2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
 student3 <- c(100,NA,NA,NA,NA)
 ```
 
-```{r}
+``` r
 student1[-which.min(student1)] # Adding a minus sign gives you everything except...
 ```
 
-```{r}
+    ## [1] 100 100 100 100 100 100 100
+
+``` r
 mean(student2[-which.min(student2)], na.rm = TRUE)
 ```
 
-```{r}
+    ## [1] 92.83333
+
+``` r
 sum(student2[-which.min(student2)], na.rm = TRUE) / (length(student2) - 1)
 ```
-```{r}
+
+    ## [1] 79.57143
+
+``` r
 new_grade <- function(x) {
   sum(x[-which.min(x)], na.rm = TRUE) / (length(x) - 1)
 }
 ```
 
-```{r}
+``` r
 new_grade(student1)
+```
+
+    ## [1] 100
+
+``` r
 new_grade(student2)
 ```
 
+    ## [1] 79.57143
 
-```
-
-
-
-
-
-
+\`\`\`
