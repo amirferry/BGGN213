@@ -1,0 +1,194 @@
+---
+title: "class8"
+author: "Amir Ferry"
+date: "10/25/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## K-means example
+
+Make up some data to cluster
+
+```{r}
+tmp <- c(rnorm(30,-3), rnorm(30,3)) # rnorm will give me 30 points around -3/+3
+x <- cbind(x=tmp, y=rev(tmp)) 
+plot(x)
+```
+Use the kmeans() function setting k to 2 and nstart=20
+Inspect/print the results
+Q. How many points are in each cluster?
+Q. What ‘component’ of your result object details
+ - cluster size?
+ - cluster assignment/membership?
+ - cluster center?
+Plot x colored by the kmeans cluster assignment and
+ add cluster centers as blue points
+ 
+```{r}
+k <- kmeans(x, 2, nstart=20)
+```
+```{r}
+k
+```
+```{r}
+k$size # Q. How many points are in each cluster?
+k$centers # Cluster center?
+k$cluster # Assignment
+```
+```{r}
+plot(x, col = k$cluster)
+points(k$centers, col = "blue", pch = 15)
+```
+
+ ## Hierarchical clustering in R
+ 
+```{r}
+hc <- hclust( dist(x) ) # Directly passing distance through hclust (instead of storing)
+```
+ 
+ Plot my results
+```{r}
+plot(hc)
+abline(h=6, col="red")
+abline(h=4, col = "blue")
+cutree(hc, h = 6)
+```
+ 
+ ## Note you can see the two clusters (1-30 and 31-60) without telling it to show 2
+ 
+```{r}
+grps <- cutree(hc, h=4)
+table(grps)
+```
+ 
+ I can also cut tree to a defined # of groups using k = #
+```{r}
+grps <- cutree(hc, k = 2)
+```
+ 
+```{r}
+plot(x, col = grps)
+```
+ 
+```{r}
+# Step 1. Generate some example data for clustering
+x <- rbind(
+ matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2), # c1
+ matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2
+ matrix(c(rnorm(50, mean = 1, sd = 0.3), # c3
+ rnorm(50, mean = 0, sd = 0.3)), ncol = 2))
+colnames(x) <- c("x", "y")
+```
+ 
+```{r}
+plot(x)
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+```
+```{r}
+hc <- hclust(dist(x))
+plot(hc)
+```
+ 
+```{r}
+hc <- hclust(dist(x))
+grps <- cutree(hc, k = 3)
+plot(x, col = grps) # assign color according to clustering
+```
+ 
+```{r}
+table(grps)
+```
+ 
+```{r}
+## You can also download this file from the class website!
+mydata <- read.csv("https://tinyurl.com/expression-CSV", row.names=1) 
+
+head(mydata)
+```
+
+```{r}
+nrow(mydata)
+ncol(mydata)
+```
+
+
+## NOTE: prcomp() expects the samples to be rows and
+genes to be columns so we need to first transpose the
+matrix with the t() function!
+
+```{r}
+## lets do PCA
+pca <- prcomp(t(mydata), scale=TRUE) # Flips the matrix
+```
+ 
+```{r}
+pca
+pca$x[,1]
+```
+ 
+```{r}
+plot(pca$x[,1], pca$x[,2])
+```
+ 
+```{r}
+summary(pca)
+```
+ 
+```{r}
+## Precent variance is often more informative to look at
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+
+pca.var.per
+```
+ 
+```{r}
+plot(pca)
+```
+ 
+```{r}
+plot(pca$x[,1:2], col = c("red", "red", "red", "red", "red", "blue", "blue", "blue", "blue", "blue"))
+```
+## PCA Exercise - Europe Food Trends
+
+```{r}
+x <- read.csv("UK_foods.csv", row.names = 1)
+nrow(x)
+ncol(x)
+```
+
+```{r}
+head(x)
+```
+
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x))) # beside juxtaposes or stacks data
+```
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+```{r}
+pca <- prcomp(t(x))
+summary(pca)
+```
+
+```{r}
+plot(pca$x[,1:2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1:2], colnames(x), col = (1:4))
+```
+
+
+
+
+
+
+
+
+
+
