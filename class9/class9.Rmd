@@ -1,0 +1,159 @@
+---
+title: "class9"
+author: "Amir Ferry"
+date: "10/30/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+wisc.df <- read.csv("WisconsinCancer (1).csv")
+```
+```{r}
+head(wisc.df)
+```
+
+Here we examine data from `r nrow(wisc.df)` patient samples.
+
+```{r}
+x <- table(wisc.df$diagnosis) # Use table function to tabulate # each diagnoses 
+```
+
+In this data set, we have `r x["M"]` cancer and `r x["B"]` non-cancer
+
+
+```{r}
+colnames(wisc.df)
+```
+```{r}
+grep("_mean", colnames(wisc.df), value = TRUE)
+```
+
+To find out how many there are, I can call `length()` on the result of `grep()` 
+
+```{r}
+length(grep("_mean", colnames(wisc.df), value = TRUE))
+```
+```{r}
+wisc.data <- as.matrix(wisc.df[,3:32]) # Convert to a matrix, excluding ID and X columns
+```
+
+```{r}
+round(apply(wisc.data, 2, sd), 3)
+```
+```{r}
+# Perform PCA
+
+wisc.pr <- prcomp(wisc.data, scale = TRUE) # SD shows lots of variation so need to scale
+summary(wisc.pr)
+```
+```{r}
+# Plot using biplot function
+biplot(wisc.pr)
+```
+```{r}
+plot(wisc.pr) #Screeeee plot
+```
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,2],
+     xlab = "PC1", ylab = "PC2", col = wisc.df$diagnosis) # Color by diagnoses
+```
+
+```{r}
+x <- summary(wisc.pr)
+```
+```{r}
+x$importance[,"PC1"]
+```
+
+The first PC captures `r x$importance[2,"PC1"] * 100 ` of the original variance 
+
+> Q How many PC's are required to describe at least 70% of the data?
+
+```{r}
+which(x$importance[3,] > 0.7) [1] # Give me first value that captures >70%
+```
+
+Hierarchical Clustering
+
+```{r}
+data.scaled <- scale(wisc.data)
+```
+```{r}
+data.dist <- dist(data.scaled)
+```
+
+Create hierarchical cluster model using complete linkage
+
+```{r}
+wisc.hclust <- hclust(data.dist, "complete")
+```
+```{r}
+plot(wisc.hclust)
+abline(h = 19, col = "red", lty = 2)
+
+```
+
+```{r}
+dist.pca <- dist(wisc.pr$x[,1:7])
+wisc.pr.hclust <- hclust(dist.pca, method = "ward.D2")
+plot(wisc.pr.hclust)
+```
+
+```{r}
+grps <- cutree(wisc.pr.hclust, k=2)
+table(grps)
+table(grps, wisc.df$diagnosis)
+```
+```{r}
+plot(wisc.pr$x[,1:2], col = grps)
+```
+
+```{r}
+g <- as.factor(grps)
+levels(g)
+```
+```{r}
+g <- relevel(g,2)
+levels(g)
+```
+
+```{r}
+plot(wisc.pr$x[,1:2], col=g)
+```
+
+```{r}
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+```
+
+```{r}
+plot(wisc.pr$x[,1:2], col = g)
+points(npc[,1:2], col = "blue", pch = 16, cex = 3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
