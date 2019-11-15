@@ -1,0 +1,159 @@
+---
+title: "Class15"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load DESeq2
+```{r}
+library(DESeq2)
+```
+
+## Read in data files and set first row as the name (instead of #)
+```{r}
+counts <- read.csv("GSE37704_featurecounts.csv", row.names = 1)
+metadata <- read.csv("GSE37704_metadata.csv", row.names = 1)
+```
+
+## We need to remove the 'lengths' column, select first column and remove using minus sign...note it is sometimes dangerous to keep same variable name
+```{r}
+trim.counts <- counts[,-1]
+trim.counts
+```
+
+## Only keep rows where the sum is greater than 0 - not interested in unexpressed genes!
+```{r}
+trim.counts <- trim.counts[rowSums(trim.counts) >0,]
+head(trim.counts)
+nrow(trim.counts)
+```
+
+## Principal Component Analysis - remember need to transpose data - this will allow us to quickly check our 15975 data points
+```{r}
+PC <- prcomp(t(trim.counts))
+plot(PC)
+```
+
+```{r}
+summary(PC)
+```
+
+```{r}
+attributes(PC)
+```
+
+## Create a vector with 2 colors that repeat using 'rep'
+```{r}
+mycols <- c(rep("blue",3), rep("red", 3))
+plot(PC$x[,1:2], col = mycols)
+```
+
+## Set up the object required for DESeq function
+```{r}
+dds = DESeqDataSetFromMatrix(countData = trim.counts,
+                             colData = metadata,
+                             design = ~condition)
+dds = DESeq(dds)
+```
+
+```{r}
+res <- results(dds)
+res
+```
+```{r}
+summary(res)
+```
+
+```{r}
+mycols <- rep("gray", nrow(res)) #Make a gray vector for all data points
+mycols[abs(res$log2FoldChange) > 2] <- "red"
+inds <- (res$padj < 0.01) & (abs(res$log2FoldChange) > 2)
+mycols[inds] <- "blue"
+
+plot(res$log2FoldChange, -log(res$padj), col=mycols)
+```
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+```{r}
+columns(org.Hs.eg.db)
+```
+
+```{r}
+
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(res), # Where are your gene ids?
+                    keytype="ENSEMBL", # What format are ids?
+                    column="SYMBOL", # What new ids format do you want?
+                    multiVals="first") # Take the first one (sometimes multiple products correspond to the same gene ID)
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+
+head(res, 10)
+```
+
+```{r}
+res = res[order(res$pvalue),]
+write.csv(res,file="deseq_results.csv")
+```
+
+```{r}
+library(pathview)
+```
+
+```{r}
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+attributes(keggres)
+```
+```{r}
+# Look at the first few down (less) pathways
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+![My first pathway](./hsa04110.pathview.png)
+
+
